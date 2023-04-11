@@ -10,7 +10,17 @@ Easily switch between SHR and RAID F1
 
 This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
 
-**NOTE** I would ***not*** change between RAID F1 and SHR if you already have a storage pool containg data setup 
+**NOTE** Changing to RAID F1 disables SHR, and changing to SHR disables RAID F1. 
+- I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup using SHR.
+- I would ***not*** change to RAID F1 to SHR if you already have a storage pool containg data setup using RAID F1.
+
+### What is RAID F1
+
+RAID F1 is Synology's RAID 5 for all flash (SSD) storage pools that tries to ensure that multiple SSD drives don't reach the end of thier life at the same time. F stands for flash, and 1 stands for 1-disk resiliency and 1-parity.
+
+See Synology's <a href="https://global.download.synology.com/download/Document/Software/WhitePaper/Firmware/DSM/All/enu/Synology_RAID_F1_WP.pdf">RAID F1 whitepaper</a>
+
+Also see: <a href="https://www.insight.com/en_US/content-and-resources/2017/01112017-rethinking-raid-in-all-flash-environments.html">Synology RAID F1: Rethinking RAID in all-Flash Environments</a>
 
 <p align="center">Switch to RAID F1</p>
 <p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
