@@ -26,6 +26,7 @@ Also see: <a href="https://www.insight.com/en_US/content-and-resources/2017/0111
 
 See <a href=images/how_to_download_generic.png/>How to download the script</a> for the easiest way to download the script.
 
+### Screenshots
 
 <p align="center">Switch to RAID F1</p>
 <p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
