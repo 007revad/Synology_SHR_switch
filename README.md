@@ -16,7 +16,7 @@ This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It
 
 ### What is RAID F1
 
-RAID F1 is Synology's RAID 5 for all flash (SSD) storage pools. F stands for flash, and 1 stands for 1-disk resiliency and 1-parity.
+RAID F1 is Synology's RAID 5 for all flash (SSD) storage pools that tries to ensure that multiple SSD drives don't reach the end of thier life at the same time. F stands for flash, and 1 stands for 1-disk resiliency and 1-parity.
 
 See Synology's <a href="https://global.download.synology.com/download/Document/Software/WhitePaper/Firmware/DSM/All/enu/Synology_RAID_F1_WP.pdf">RAID F1 whitepaper</a>
 
