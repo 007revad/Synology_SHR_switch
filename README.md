@@ -10,8 +10,13 @@ Easily switch between SHR and RAID F1
 
 This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
 
+**NOTE** I would ***not*** change between RAID F1 and SHR if you already have a storage pool containg data setup 
+
+<p align="center">Switch to RAID F1</p>
 <p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
 
+<p align="center">Switch to SHR</p>
 <p align="center"><img src="/images/raidf1_shr-switch2.png"></p>
 
+<p align="center">Restore from the backup</p>
 <p align="center"><img src="/images/raidf1_shr-switch3.png"></p>
