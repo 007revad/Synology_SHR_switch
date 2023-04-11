@@ -22,6 +22,11 @@ See Synology's <a href="https://global.download.synology.com/download/Document/S
 
 Also see: <a href="https://www.insight.com/en_US/content-and-resources/2017/01112017-rethinking-raid-in-all-flash-environments.html">Synology RAID F1: Rethinking RAID in all-Flash Environments</a>
 
+### Download the script
+
+See <a href=images/how_to_download_generic.png/>How to download the script</a> for the easiest way to download the script.
+
+
 <p align="center">Switch to RAID F1</p>
 <p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
 
