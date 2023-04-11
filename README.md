@@ -14,6 +14,10 @@ This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It
 - I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup using SHR.
 - I would ***not*** change to RAID F1 to SHR if you already have a storage pool containg data setup using RAID F1.
 
+### What is RAID F1
+
+<a href="https://www.insight.com/en_US/content-and-resources/2017/01112017-rethinking-raid-in-all-flash-environments.html">Synology RAID F1: Rethinking RAID in all-Flash Environments</a>
+
 <p align="center">Switch to RAID F1</p>
 <p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
 
