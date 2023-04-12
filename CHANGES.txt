@@ -1,0 +1,7 @@
+v1.0.2
+- Added --check option to check and show currently selected RAID type.
+- Added --help option to usage options.
+- Changed to not show the current RAID type as a choice to change to.
+
+v1.0.1
+- Initial release.
