@@ -12,7 +12,7 @@
 # https://kb.synology.com/en-ro/DSM/tutorial/Which_Synology_NAS_models_support_RAID_F1
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.2"
+scriptver="v1.0.3"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
 
