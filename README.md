@@ -29,10 +29,13 @@ See <a href=images/how_to_download_generic.png/>How to download the script</a> f
 ### Screenshots
 
 <p align="center">Switch to RAID F1</p>
-<p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_raidf1.png"></p>
 
 <p align="center">Switch to SHR</p>
-<p align="center"><img src="/images/raidf1_shr-switch2.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_shr.png"></p>
 
 <p align="center">Restore from the backup</p>
-<p align="center"><img src="/images/raidf1_shr-switch3.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_restored2.png"></p>
+
+<p align="center">Check currently set RAID type</p>
+<p align="center"><img src="/images/raidf1_shr-switch_check.png"></p>
