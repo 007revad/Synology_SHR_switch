@@ -12,7 +12,7 @@
 # https://kb.synology.com/en-ro/DSM/tutorial/Which_Synology_NAS_models_support_RAID_F1
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.1"
+scriptver="v1.0.2"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
 
@@ -21,8 +21,8 @@ repo="007revad/Synology_RAID-F1_SHR_switch"
 # Shell Colors
 #Black='\e[0;30m'   # ${Black}
 Red='\e[0;31m'      # ${Red}
-Green='\e[0;32m'    # ${Green}
-Yellow='\e[0;33m'   # ${Yellow}
+#Green='\e[0;32m'    # ${Green}
+#Yellow='\e[0;33m'   # ${Yellow}
 #Blue='\e[0;34m'    # ${Blue}
 #Purple='\e[0;35m'  # ${Purple}
 Cyan='\e[0;36m'     # ${Cyan}
@@ -32,7 +32,17 @@ Off='\e[0m'         # ${Off}
 
 
 usage(){
-    scriptversion
+    cat <<EOF
+$script $scriptver - by 007revad
+
+Usage: $(basename "$0") [options]
+
+Options:
+  -c, --check      Check the currently set RAID type
+  -h, --help       Show this help message
+  -v, --version    Show the script version
+
+EOF
 }
 
 scriptversion(){
@@ -40,22 +50,27 @@ scriptversion(){
 $script $scriptver - by 007revad
 
 See https://github.com/$repo
+
 EOF
-    exit
 }
 
 
 # Check for flags with getopt
 if options="$(getopt -o abcdefghijklmnopqrstuvwxyz0123456789 -a \
-    -l help,version,log,debug -- "$@")"; then
+    -l check,help,version,log,debug -- "$@")"; then
     eval set -- "$options"
     while true; do
         case "${1,,}" in
+            -c|--check)         # Show current raid type
+                check=yes
+                ;;
             -h|--help)          # Show usage options
                 usage
+                exit
                 ;;
             -v|--version)       # Show script version
                 scriptversion
+                exit
                 ;;
             -l|--log)           # Log
                 log=yes
@@ -75,8 +90,8 @@ if options="$(getopt -o abcdefghijklmnopqrstuvwxyz0123456789 -a \
         shift
     done
 else
-    #echo
     usage
+    exit
 fi
 
 
@@ -233,21 +248,70 @@ fi
 synoinfo="/etc.defaults/synoinfo.conf"
 
 
+#----------------------------------------------------------
+# Check currently enabled RAID type
+
+# Enable RAID F1
+# Set the following SHR line to "no":
+# support_syno_hybrid_raid="no"
+# 
+# Then add this line to enable RAID F1:
+# supportraidgroup="yes"
+
+# Set short variables
+sshr=support_syno_hybrid_raid
+srg=supportraidgroup
+
+# Check current setting
+checkcurrent(){
+    settingshr="$(get_key_value $synoinfo ${sshr})"
+    settingf1="$(get_key_value $synoinfo ${srg})"
+    if [[ $settingshr == "yes" ]] && [[ $settingf1 != "yes" ]]; then
+        echo -e "${Cyan}SHR${Off} ${1}enabled.\n" >&2
+        enabled="shr"
+    elif [[ $settingshr != "yes" ]] && [[ $settingf1 == "yes" ]]; then
+        echo -e "${Cyan}RAID F1${Off} ${1}enabled.\n" >&2
+        enabled="raidf1"
+    fi
+}
+
+#checkcurrent "is currently "
+checkcurrent "is "
+if [[ $check == "yes" ]]; then
+    exit
+fi
+
+
 #--------------------------------------------------------------------
 # Select RAID type
 
 PS3="Select the RAID type: "
-options=("SHR" "RAID F1" "Restore" "Quit")
+if [[ $enabled == "shr" ]]; then
+    options=("RAID F1" "Restore" "Quit")
+elif [[ $enabled == "raidf1" ]]; then
+    options=("SHR" "Restore" "Quit")
+else
+    options=("SHR" "RAID F1" "Restore" "Quit")
+fi
 select raid in "${options[@]}"; do
     case "$raid" in
         SHR)
             shr="yes"
             echo -e "You selected ${Cyan}SHR${Off}"
-            break
+            if [[ $enabled == "shr" ]]; then
+                echo -e "${Cyan}SHR${Off} is already enabled."
+            else
+                break
+            fi
             ;;
         "RAID F1")
             raidf1="yes"
             echo -e "You selected ${Cyan}RAID F1${Off}"
+            if [[ $enabled == "raidf1" ]]; then
+                echo -e "${Cyan}RAID F1${Off} is already enabled."
+            else
+                break
+            fi
             break
             ;;
         Restore)
@@ -273,11 +337,11 @@ if [[ $restore == "yes" ]]; then
     if [[ -f ${synoinfo}.bak ]]; then
         # Restore from backup
         if cp "$synoinfo".bak "$synoinfo" ; then
-            echo -e "\nSuccessfully restored from backup."
-#            rebootmsg
+            echo -e "\nSuccessfully restored from backup.\n"
+            checkcurrent "is now "
             exit
         else
-            echo -e "\n${Error}ERROR ${Off} Backup failed!"
+            echo -e "\n${Error}ERROR ${Off} Restore from backup failed!"
             exit 1
         fi
     else
@@ -292,9 +356,9 @@ fi
 
 if [[ ! -f ${synoinfo}.bak ]]; then
     if cp "$synoinfo" "$synoinfo".bak ; then
-        echo -e "\nBackup successful."
+        echo -e "\nsynoinfo.conf backed up."
     else
-        echo -e "\n${Error}ERROR ${Off} Backup failed!"
+        echo -e "\n${Error}ERROR ${Off} synoinfo.conf backup failed!"
         exit 1
     fi
 else
@@ -304,32 +368,6 @@ fi
 
 #----------------------------------------------------------
 # Edit synoinfo.conf
-
-# Enable RAID F1
-# Set the following SHR line to "no":
-# support_syno_hybrid_raid="no"
-# 
-# Then add this line to enable RAID F1:
-# supportraidgroup="yes"
-
-# Get current settings
-sshr=support_syno_hybrid_raid
-settingshr="$(get_key_value $synoinfo ${sshr})"
-srg=supportraidgroup
-settingf1="$(get_key_value $synoinfo ${srg})"
-
-# Check current setting
-if [[ $settingshr == "yes" ]] && [[ $settingf1 != "yes" ]]; then
-    echo -e "\n${Cyan}SHR${Off} is currently enabled."
-    if [[ $shr == "yes" ]]; then
-        exit
-    fi
-elif [[ $settingshr != "yes" ]] && [[ $settingf1 == "yes" ]]; then
-    echo -e "\n${Cyan}RAID F1${Off} is currently enabled."
-    if [[ $raidf1 == "yes" ]]; then
-        exit
-    fi
-fi
 
 # Enable RAID F1
 if [[ $raidf1 == "yes" ]]; then
@@ -351,7 +389,7 @@ if [[ $raidf1 == "yes" ]]; then
     settingshr="$(get_key_value $synoinfo ${sshr})"
     settingf1="$(get_key_value $synoinfo ${srg})"
     if [[ $settingshr != "yes" ]] && [[ $settingf1 == "yes" ]]; then
-        echo -e "\n${Cyan}RAID F1${Off} has been enabled."
+        echo -e "\n${Cyan}RAID F1${Off} has been enabled.\n"
     else
         echo -e "\n${Error}ERROR${Off} Failed to enable RAID F1!"
     fi
@@ -378,7 +416,7 @@ if [[ $shr == "yes" ]]; then
     settingshr="$(get_key_value $synoinfo ${sshr})"
     settingf1="$(get_key_value $synoinfo ${srg})"
     if [[ $settingshr == "yes" ]] && [[ $settingf1 != "yes" ]]; then
-        echo -e "\n${Cyan}SHR${Off} has been enabled."
+        echo -e "\n${Cyan}SHR${Off} has been enabled.\n"
     else
         echo -e "\n${Error}ERROR${Off} Failed to enable SHR!"
     fi
