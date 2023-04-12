@@ -10,9 +10,13 @@ Easily switch between SHR and RAID F1
 
 This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
 
-**NOTE** Changing to RAID F1 disables SHR, and changing to SHR disables RAID F1. 
-- I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup using SHR.
-- I would ***not*** change from RAID F1 to SHR if you already have a storage pool containg data setup using RAID F1.
+**Notes:** 
+
+1. You need 3 or more SSD drives to be able to user RAID F1.
+
+2. Changing to RAID F1 disables SHR, and changing to SHR disables RAID F1. 
+    - I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup using SHR.
+    - I would ***not*** change from RAID F1 to SHR if you already have a storage pool containg data setup using RAID F1.
 
 ### What is RAID F1
 
@@ -22,17 +26,36 @@ See Synology's <a href="https://global.download.synology.com/download/Document/S
 
 Also see: <a href="https://www.insight.com/en_US/content-and-resources/2017/01112017-rethinking-raid-in-all-flash-environments.html">Synology RAID F1: Rethinking RAID in all-Flash Environments</a>
 
-### Download the script
+## Download the script
 
 See <a href=images/how_to_download_generic.png/>How to download the script</a> for the easiest way to download the script.
 
-### Screenshots
+## How to run the script
+
+**Run the script via SSH**
+
+```YAML
+sudo -i /volume1/scripts/syno_raidf1_shr_switch.sh
+```
+**Note:** Replace /volume1/scripts/ with the path to where the script is located.
+
+**Options:**
+```YAML
+  -c, --check      Check the currently set RAID type
+  -h, --help       Show this help message
+  -v, --version    Show the script version
+```
+
+## Screenshots
 
 <p align="center">Switch to RAID F1</p>
-<p align="center"><img src="/images/raidf1_shr-switch1.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_raidf12.png"></p>
 
 <p align="center">Switch to SHR</p>
-<p align="center"><img src="/images/raidf1_shr-switch2.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_shr.png"></p>
 
 <p align="center">Restore from the backup</p>
-<p align="center"><img src="/images/raidf1_shr-switch3.png"></p>
+<p align="center"><img src="/images/raidf1_shr-switch_restored2.png"></p>
+
+<p align="center">Check currently set RAID type</p>
+<p align="center"><img src="/images/raidf1_shr-switch_check.png"></p>
