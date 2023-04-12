@@ -15,8 +15,8 @@ This script allows you to switch from SHR to RAID F1, or from RAID F1 to SHR. It
 1. You need 3 or more SSD drives to be able to user RAID F1.
 
 2. Changing to RAID F1 disables SHR, and changing to SHR disables RAID F1. 
-    - I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup using SHR.
-    - I would ***not*** change from RAID F1 to SHR if you already have a storage pool containg data setup using RAID F1.
+    - I would ***not*** change from SHR to RAID F1 if you already have a storage pool containg data setup as SHR.
+    - I would ***not*** change from RAID F1 to SHR if you already have a storage pool containg data setup as RAID F1.
 
 ### What is RAID F1
 
