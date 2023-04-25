@@ -1,3 +1,7 @@
+
+v1.0.4
+- Prevent running with "sh scriptname.sh".
+
 v1.0.3
 - Added --check option to check and show currently selected RAID type.
 - Added --help option to usage options.
