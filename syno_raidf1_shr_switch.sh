@@ -12,9 +12,15 @@
 # https://kb.synology.com/en-ro/DSM/tutorial/Which_Synology_NAS_models_support_RAID_F1
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.3"
+scriptver="v1.0.4"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
+
+# Check BASH variable is is non-empty and posix mode is off, else abort with error.
+[ "$BASH" ] && ! shopt -qo posix || {
+    printf >&2 "This is a bash script, don't run it with sh\n"
+    exit 1
+}
 
 #echo -e "bash version: $(bash --version | head -1 | cut -d' ' -f4)\n"  # debug
 
@@ -209,14 +215,14 @@ if ! printf "%s\n%s\n" "$tag" "$scriptver" |
 
                             # Delete downloaded .tar.gz file
                             if ! rm "/tmp/$script-$shorttag.tar.gz"; then
-                                delerr=1
+                                #delerr=1
                                 echo -e "${Error}ERROR ${Off} Failed to delete"\
                                     "downloaded /tmp/$script-$shorttag.tar.gz!"
                             fi
 
                             # Delete extracted tmp files
                             if ! rm -r "/tmp/$script-$shorttag"; then
-                                delerr=1
+                                #delerr=1
                                 echo -e "${Error}ERROR ${Off} Failed to delete"\
                                     "downloaded /tmp/$script-$shorttag!"
                             fi
@@ -287,11 +293,14 @@ fi
 
 PS3="Select the RAID type: "
 if [[ $enabled == "shr" ]]; then
-    options=("RAID F1" "Restore" "Quit")
+    #options=("RAID F1" "Restore" "Quit")
+    options=("RAID F1" "Quit")
 elif [[ $enabled == "raidf1" ]]; then
-    options=("SHR" "Restore" "Quit")
+    #options=("SHR" "Restore" "Quit")
+    options=("SHR" "Quit")
 else
-    options=("SHR" "RAID F1" "Restore" "Quit")
+    #options=("SHR" "RAID F1" "Restore" "Quit")
+    options=("SHR" "RAID F1" "Quit")
 fi
 select raid in "${options[@]}"; do
     case "$raid" in
