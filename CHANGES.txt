@@ -1,5 +1,6 @@
 v1.0.4
-- Removed Restore menu choice as it was not needed (and was dangerous to restore synoinfo.conf from a backup in case it was made while using an older DSM version).
+- Removed Restore menu choice as it was not needed.
+    -  And was dangerous to restore synoinfo.conf from a backup in case it was made while using an older DSM version.
 - Prevent running with "sh scriptname.sh".
 
 v1.0.3
