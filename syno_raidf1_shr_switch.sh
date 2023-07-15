@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 #------------------------------------------------------------------------------
-# Enables using non-Synology NVMe drives so you can create a storage pool
-# and volume on any M.2 drive(s) entirely in DSM Storage Manager.
+# Switch between SHR and RAID Group for models that have SHR & SHR-2 disabled
 #
 # Github: https://github.com/007revad/Synology_RAID-F1_SHR_switch
 # Script verified at https://www.shellcheck.net/
 #
 # To run in a shell (replace /volume1/scripts/ with path to script):
 # sudo /volume1/scripts/syno_raidf1_shr_switch.sh
-#
-# https://kb.synology.com/en-ro/DSM/tutorial/Which_Synology_NAS_models_support_RAID_F1
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.4"
+scriptver="v1.0.5"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
 
-# Check BASH variable is is non-empty and posix mode is off, else abort with error.
-[ "$BASH" ] && ! shopt -qo posix || {
-    printf >&2 "This is a bash script, don't run it with sh\n"
+scriptshow=Synology_RAID-Group_SHR_switch
+
+# Check BASH variable is bash
+if [ ! "$(basename "$BASH")" = bash ]; then
+    echo "This is a bash script. Do not run it with $(basename "$BASH")"
+    printf \\a
     exit 1
-}
+fi
 
 #echo -e "bash version: $(bash --version | head -1 | cut -d' ' -f4)\n"  # debug
 
@@ -39,7 +39,7 @@ Off='\e[0m'         # ${Off}
 
 usage(){
     cat <<EOF
-$script $scriptver - by 007revad
+$scriptshow $scriptver - by 007revad
 
 Usage: $(basename "$0") [options]
 
@@ -49,40 +49,45 @@ Options:
   -v, --version    Show the script version
 
 EOF
+    exit 0
 }
 
 scriptversion(){
     cat <<EOF
-$script $scriptver - by 007revad
+$scriptshow $scriptver - by 007revad
 
 See https://github.com/$repo
 
 EOF
+    exit 0
 }
 
 
+# Save options used
+args=("$@")
+
+
 # Check for flags with getopt
-if options="$(getopt -o abcdefghijklmnopqrstuvwxyz0123456789 -a \
-    -l check,help,version,log,debug -- "$@")"; then
+if options="$(getopt -o abcdefghijklmnopqrstuvwxyz0123456789 -l \
+    check,help,version,log,debug -- "$@")"; then
     eval set -- "$options"
     while true; do
         case "${1,,}" in
-            -c|--check)         # Show current raid type
-                check=yes
-                ;;
             -h|--help)          # Show usage options
                 usage
-                exit
                 ;;
             -v|--version)       # Show script version
                 scriptversion
-                exit
                 ;;
             -l|--log)           # Log
                 log=yes
                 ;;
             -d|--debug)         # Show and log debug info
                 debug=yes
+                ;;
+            -c|--check)         # Show current raid type
+                check=yes
+                break
                 ;;
             --)
                 shift
@@ -97,7 +102,6 @@ if options="$(getopt -o abcdefghijklmnopqrstuvwxyz0123456789 -a \
     done
 else
     usage
-    exit
 fi
 
 
@@ -231,10 +235,14 @@ if ! printf "%s\n%s\n" "$tag" "$scriptver" |
                             if [[ $copyerr != 1 ]] && [[ $permerr != 1 ]]; then
                                 echo -e "\n$tag and changes.txt downloaded to:"\
                                     "$scriptpath"
-                                echo -e "${Cyan}Do you want to stop this script"\
-                                    "so you can run the new one?${Off} [y/n]"
-                                read -r reply
-                                if [[ ${reply,,} == "y" ]]; then exit; fi
+                                #echo -e "${Cyan}Do you want to stop this script"\
+                                #    "so you can run the new one?${Off} [y/n]"
+                                #read -r reply
+                                #if [[ ${reply,,} == "y" ]]; then exit; fi
+
+                                # Reload script
+                                printf -- '-%.0s' {1..79}; echo  # print 79 -
+                                exec "$0" "${args[@]}"
                             fi
                         fi
                     else
@@ -257,11 +265,12 @@ synoinfo="/etc.defaults/synoinfo.conf"
 #----------------------------------------------------------
 # Check currently enabled RAID type
 
-# Enable RAID F1
-# Set the following SHR line to "no":
+# Enable SHR
+# support_syno_hybrid_raid="yes"
+# supportraidgroup="no"
+#
+# Enable RAID Group
 # support_syno_hybrid_raid="no"
-# 
-# Then add this line to enable RAID F1:
 # supportraidgroup="yes"
 
 # Set short variables
@@ -271,13 +280,13 @@ srg=supportraidgroup
 # Check current setting
 checkcurrent(){
     settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingf1="$(get_key_value $synoinfo ${srg})"
-    if [[ $settingshr == "yes" ]] && [[ $settingf1 != "yes" ]]; then
+    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    if [[ $settingshr == "yes" ]] && [[ $settingraidgrp != "yes" ]]; then
         echo -e "${Cyan}SHR${Off} ${1}enabled.\n" >&2
         enabled="shr"
-    elif [[ $settingshr != "yes" ]] && [[ $settingf1 == "yes" ]]; then
-        echo -e "${Cyan}RAID F1${Off} ${1}enabled.\n" >&2
-        enabled="raidf1"
+    elif [[ $settingshr != "yes" ]] && [[ $settingraidgrp == "yes" ]]; then
+        echo -e "${Cyan}RAID Group${Off} ${1}enabled.\n" >&2
+        enabled="raidgrp"
     fi
 }
 
@@ -293,14 +302,14 @@ fi
 
 PS3="Select the RAID type: "
 if [[ $enabled == "shr" ]]; then
-    #options=("RAID F1" "Restore" "Quit")
-    options=("RAID F1" "Quit")
-elif [[ $enabled == "raidf1" ]]; then
-    #options=("SHR" "Restore" "Quit")
-    options=("SHR" "Quit")
+    options=("RAID Group" "Restore" "Quit")
+    #options=("RAID Group" "Quit")
+elif [[ $enabled == "raidgrp" ]]; then
+    options=("SHR" "Restore" "Quit")
+    #options=("SHR" "Quit")
 else
-    #options=("SHR" "RAID F1" "Restore" "Quit")
-    options=("SHR" "RAID F1" "Quit")
+    #options=("SHR" "RAID Group" "Restore" "Quit")
+    options=("SHR" "RAID Group" "Quit")
 fi
 select raid in "${options[@]}"; do
     case "$raid" in
@@ -313,11 +322,11 @@ select raid in "${options[@]}"; do
                 break
             fi
             ;;
-        "RAID F1")
-            raidf1="yes"
-            echo -e "You selected ${Cyan}RAID F1${Off}"
-            if [[ $enabled == "raidf1" ]]; then
-                echo -e "${Cyan}RAID F1${Off} is already enabled."
+        "RAID Group")
+            raidgrp="yes"
+            echo -e "You selected ${Cyan}RAID Group${Off}"
+            if [[ $enabled == "raidgrp" ]]; then
+                echo -e "${Cyan}RAID Group${Off} is already enabled."
             else
                 break
             fi
@@ -332,7 +341,7 @@ select raid in "${options[@]}"; do
             echo -e "You selected ${Cyan}Quit${Off}"
             exit
             ;;
-        *) 
+        *)
             echo -e "${Red}Invalid answer!${Off} Try again."
             ;;
     esac
@@ -345,18 +354,46 @@ done
 if [[ $restore == "yes" ]]; then
     if [[ -f ${synoinfo}.bak ]]; then
         # Restore from backup
-        if cp "$synoinfo".bak "$synoinfo" ; then
-            echo -e "\nSuccessfully restored from backup.\n"
-            checkcurrent "is now "
-            exit
+        #if cp -p "$synoinfo".bak "$synoinfo" ; then
+        #    echo -e "\nSuccessfully restored from backup.\n"
+        #    checkcurrent "is now "
+        #    exit
+        #else
+        #    echo -e "\n${Error}ERROR ${Off} Restore from backup failed!"
+        #    exit 1
+        #fi
+
+        # Get default key values from backup
+        defaultsrg=$(synogetkeyvalue "$synoinfo".bak "$srg")
+        defaultsshr=$(synogetkeyvalue "$synoinfo".bak "$sshr")
+
+        # Set key values to defaults
+        if [[ $defaultsrg ]]; then
+            #echo -e "\nset support_raid_group $defaultsrg"    # debug
+
+            synosetkeyvalue "$synoinfo" "$srg" "$defaultsrg"
         else
-            echo -e "\n${Error}ERROR ${Off} Restore from backup failed!"
-            exit 1
+            #echo -e "\nset support_raid_group no"             # debug
+
+            synosetkeyvalue "$synoinfo" "$srg" "no"
         fi
+        if [[ $defaultsshr ]]; then
+            #echo "set support_syno_hybrid_raid $defaultsshr"  # debug
+
+            synosetkeyvalue "$synoinfo" "$sshr" "$defaultsshr"
+        else
+            #echo "set support_syno_hybrid_raid no"            # debug
+
+            synosetkeyvalue "$synoinfo" "$sshr" "no"
+        fi
+
+        echo
+        checkcurrent "is "
     else
         echo -e "\n${Error}ERROR ${Off} Backup synoinfo.conf not found!"
         exit 1
     fi
+    exit
 fi
 
 
@@ -364,7 +401,7 @@ fi
 # Backup synoinfo.conf
 
 if [[ ! -f ${synoinfo}.bak ]]; then
-    if cp "$synoinfo" "$synoinfo".bak ; then
+    if cp -p "$synoinfo" "$synoinfo".bak ; then
         echo -e "\nsynoinfo.conf backed up."
     else
         echo -e "\n${Error}ERROR ${Off} synoinfo.conf backup failed!"
@@ -378,9 +415,9 @@ fi
 #----------------------------------------------------------
 # Edit synoinfo.conf
 
-# Enable RAID F1
-if [[ $raidf1 == "yes" ]]; then
-    if [[ ! $settingf1 ]]; then
+# Enable RAID Group
+if [[ $raidgrp == "yes" ]]; then
+    if [[ ! $settingraidgrp ]]; then
         # Add supportraidgroup="yes"
         echo 'supportraidgroup="yes"' >> "$synoinfo"
     else
@@ -394,13 +431,13 @@ if [[ $raidf1 == "yes" ]]; then
         synosetkeyvalue "$synoinfo" "$sshr" no
     fi
 
-    # Check if we enabled RAID F1
+    # Check if we enabled RAID Group
     settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingf1="$(get_key_value $synoinfo ${srg})"
-    if [[ $settingshr != "yes" ]] && [[ $settingf1 == "yes" ]]; then
-        echo -e "\n${Cyan}RAID F1${Off} has been enabled.\n"
+    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    if [[ $settingshr != "yes" ]] && [[ $settingraidgrp == "yes" ]]; then
+        echo -e "\n${Cyan}RAID Group${Off} has been enabled.\n"
     else
-        echo -e "\n${Error}ERROR${Off} Failed to enable RAID F1!"
+        echo -e "\n${Error}ERROR${Off} Failed to enable RAID Group!"
     fi
 fi
 
@@ -423,8 +460,8 @@ if [[ $shr == "yes" ]]; then
 
     # Check if we enabled SHR
     settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingf1="$(get_key_value $synoinfo ${srg})"
-    if [[ $settingshr == "yes" ]] && [[ $settingf1 != "yes" ]]; then
+    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    if [[ $settingshr == "yes" ]] && [[ $settingraidgrp != "yes" ]]; then
         echo -e "\n${Cyan}SHR${Off} has been enabled.\n"
     else
         echo -e "\n${Error}ERROR${Off} Failed to enable SHR!"
