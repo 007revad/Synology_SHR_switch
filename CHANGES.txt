@@ -1,3 +1,9 @@
+v1.0.5
+- Changed RAID-F1 references to RAID-Group.
+- Changed to reload the script after it updates itself to a new version.
+- Changed to restore settings from backup instead of replacing synoinf.conf with the backup.
+- Minor fixes and improvements.
+
 v1.0.4
 - Removed Restore menu choice as it was not needed.
     -  And was dangerous to restore synoinfo.conf from a backup in case it was made while using an older DSM version.
