@@ -7,9 +7,9 @@
 
 ### Description
 
-Easily switch between SHR and RAID Group
+Easily switch between SHR and RAID Groups
 
-This script allows you to switch from SHR to RAID Group, or from RAID Group to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
+This script allows you to switch from SHR to RAID Groups, or from RAID Groups to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
 
 ## Download the script
 
@@ -39,7 +39,7 @@ sudo -i /volume1/scripts/syno_raidf1_shr_switch.sh
 <p align="center">Switch to SHR</p>
 <p align="center"><img src="/images/raidgroup_shr-switch_shr.png"></p>
 
-<p align="center">Switch to RAID Group</p>
+<p align="center">Switch to RAID Groups</p>
 <p align="center"><img src="/images/raidgroup_shr-switch_raidgroup.png"></p>
 
 <p align="center">Restore from the backup</p>
