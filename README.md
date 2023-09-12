@@ -9,7 +9,7 @@
 
 Easily switch between SHR and RAID Groups
 
-This script allows you to switch from SHR to RAID Groups, or from RAID Groups to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
+High-end Synology NAS models have RAID Groups enabled and SHR disabled. This script allows you to switch from SHR to RAID Groups, or from RAID Groups to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
 
 ## Download the script
 
