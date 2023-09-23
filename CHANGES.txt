@@ -1,3 +1,6 @@
+v1.0.7
+- Minor bug fix
+
 v1.0.6
 - Renamed to Synology_SHR_switch
 
