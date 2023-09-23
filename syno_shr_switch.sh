@@ -9,7 +9,7 @@
 # sudo /volume1/scripts/syno_raidf1_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.6"
+scriptver="v1.0.8"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
 
@@ -161,7 +161,7 @@ scriptpath=$( cd -P "$( dirname "$source" )" >/dev/null 2>&1 && pwd )
 
 
 if ! printf "%s\n%s\n" "$tag" "$scriptver" |
-        sort --check --version-sort &> /dev/null ; then
+        sort --check=quiet --version-sort &> /dev/null ; then
     echo -e "${Cyan}There is a newer version of this script available.${Off}"
     echo -e "Current version: ${scriptver}\nLatest version:  $tag"
     if [[ -f $scriptpath/$script-$shorttag.tar.gz ]]; then
@@ -417,19 +417,8 @@ fi
 
 # Enable RAID Group
 if [[ $raidgrp == "yes" ]]; then
-    if [[ ! $settingraidgrp ]]; then
-        # Add supportraidgroup="yes"
-        echo 'supportraidgroup="yes"' >> "$synoinfo"
-    else
-        synosetkeyvalue "$synoinfo" "$srg" yes
-    fi
-
-    if [[ ! $settingshr ]]; then
-        # Add support_m2_pool="no"
-        echo 'support_m2_pool="no"' >> "$synoinfo"
-    else
-        synosetkeyvalue "$synoinfo" "$sshr" no
-    fi
+    synosetkeyvalue "$synoinfo" "$srg" yes
+    synosetkeyvalue "$synoinfo" "$sshr" no
 
     # Check if we enabled RAID Group
     settingshr="$(get_key_value $synoinfo ${sshr})"
@@ -444,19 +433,8 @@ fi
 
 # Enable SHR
 if [[ $shr == "yes" ]]; then
-    if [[ ! $settingshr ]]; then
-        # Add support_m2_pool="yes"
-        echo 'support_m2_pool="yes"' >> "$synoinfo"
-    else
-        synosetkeyvalue "$synoinfo" "$sshr" yes
-    fi
-
-    if [[ ! $settingshr ]]; then
-        # Add supportraidgroup="no"
-        echo 'supportraidgroup="no"' >> "$synoinfo"
-    else
-        synosetkeyvalue "$synoinfo" "$srg" no
-    fi
+    synosetkeyvalue "$synoinfo" "$srg" no
+    synosetkeyvalue "$synoinfo" "$sshr" yes
 
     # Check if we enabled SHR
     settingshr="$(get_key_value $synoinfo ${sshr})"
