@@ -9,7 +9,7 @@
 # sudo /volume1/scripts/syno_raidf1_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.7"
+scriptver="v1.0.8"
 script=Synology_RAID-F1_SHR_switch
 repo="007revad/Synology_RAID-F1_SHR_switch"
 
