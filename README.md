@@ -34,14 +34,14 @@ sudo -i /volume1/scripts/syno_shr_switch.sh
 ## Screenshots
 
 <p align="center">Check currently set RAID type</p>
-<p align="center"><img src="/images/raidgroup_shr-switch_check.png"></p>
+<p align="center"><img src="/images/raidgroup_shr-switch_check3.png"></p>
 
 <p align="center">Switch to SHR</p>
-<p align="center"><img src="/images/raidgroup_shr-switch_shr.png"></p>
+<p align="center"><img src="/images/raidgroup_shr-switch_shr3.png"></p>
 
 <p align="center">Switch to RAID Groups</p>
-<p align="center"><img src="/images/raidgroup_shr-switch_raidgroup.png"></p>
+<p align="center"><img src="/images/raidgroup_shr-switch_raidgroup3.png"></p>
 
 <p align="center">Restore from the backup</p>
-<p align="center"><img src="/images/raidgroup_shr-switch_restored.png"></p>
+<p align="center"><img src="/images/raidgroup_shr-switch_restored3.png"></p>
 
