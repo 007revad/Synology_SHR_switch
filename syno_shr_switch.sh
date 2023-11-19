@@ -2,16 +2,16 @@
 #------------------------------------------------------------------------------
 # Switch between SHR and RAID Group for models that have SHR & SHR-2 disabled
 #
-# Github: https://github.com/007revad/Synology_RAID-F1_SHR_switch
+# Github: https://github.com/007revad/Synology_SHR_switch
 # Script verified at https://www.shellcheck.net/
 #
 # To run in a shell (replace /volume1/scripts/ with path to script):
-# sudo /volume1/scripts/syno_raidf1_shr_switch.sh
+# sudo /volume1/scripts/syno_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.8"
-script=Synology_RAID-F1_SHR_switch
-repo="007revad/Synology_RAID-F1_SHR_switch"
+scriptver="v1.0.9"
+script=Synology_SHR_switch
+repo="007revad/Synology_SHR_switch"
 
 scriptshow=Synology_RAID-Group_SHR_switch
 
@@ -37,7 +37,7 @@ Error='\e[41m'      # ${Error}
 Off='\e[0m'         # ${Off}
 
 
-usage(){
+usage(){ 
     cat <<EOF
 $scriptshow $scriptver - by 007revad
 
@@ -52,7 +52,7 @@ EOF
     exit 0
 }
 
-scriptversion(){
+scriptversion(){ 
     cat <<EOF
 $scriptshow $scriptver - by 007revad
 
@@ -133,7 +133,7 @@ echo -e "$model DSM $productversion-$buildnumber$smallfix $buildphase\n"
 #------------------------------------------------------------------------------
 # Check latest release with GitHub API
 
-get_latest_release() {
+get_latest_release(){ 
     # Curl timeout options:
     # https://unix.stackexchange.com/questions/94604/does-curl-have-a-timeout
     curl --silent -m 10 --connect-timeout 5 \
