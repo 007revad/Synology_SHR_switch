@@ -19,6 +19,8 @@ See <a href=images/how_to_download_generic.png/>How to download the script</a> f
 
 **Run the script via SSH**
 
+[How to enable SSH and login to DSM via SSH](https://kb.synology.com/en-global/DSM/tutorial/How_to_login_to_DSM_with_root_permission_via_SSH_Telnet)
+
 ```YAML
 sudo -i /volume1/scripts/syno_shr_switch.sh
 ```
