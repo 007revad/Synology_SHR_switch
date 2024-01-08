@@ -278,7 +278,7 @@ sshr=support_syno_hybrid_raid
 srg=supportraidgroup
 
 # Check current setting
-checkcurrent(){
+checkcurrent(){ 
     settingshr="$(get_key_value $synoinfo ${sshr})"
     settingraidgrp="$(get_key_value $synoinfo ${srg})"
     if [[ $settingshr == "yes" ]] && [[ $settingraidgrp != "yes" ]]; then
