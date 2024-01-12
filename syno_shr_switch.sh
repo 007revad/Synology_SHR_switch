@@ -9,11 +9,10 @@
 # sudo /volume1/scripts/syno_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.9"
+scriptver="v1.0.10"
 script=Synology_SHR_switch
 repo="007revad/Synology_SHR_switch"
-
-scriptshow=Synology_RAID-Group_SHR_switch
+scriptname=syno_shr_switch
 
 # Check BASH variable is bash
 if [ ! "$(basename "$BASH")" = bash ]; then
@@ -39,7 +38,7 @@ Off='\e[0m'         # ${Off}
 
 usage(){ 
     cat <<EOF
-$scriptshow $scriptver - by 007revad
+$script $scriptver - by 007revad
 
 Usage: $(basename "$0") [options]
 
@@ -54,7 +53,7 @@ EOF
 
 scriptversion(){ 
     cat <<EOF
-$scriptshow $scriptver - by 007revad
+$script $scriptver - by 007revad
 
 See https://github.com/$repo
 
@@ -105,6 +104,12 @@ else
 fi
 
 
+if [[ $debug == "yes" ]]; then
+    set -x
+    export PS4='`[[ $? == 0 ]] || echo "\e[1;31;40m($?)\e[m\n "`:.$LINENO:'
+fi
+
+
 # Check script is running as root
 if [[ $( whoami ) != "root" ]]; then
     echo -e "${Error}ERROR${Off} This script must be run as root or sudo!"
@@ -133,18 +138,15 @@ echo -e "$model DSM $productversion-$buildnumber$smallfix $buildphase\n"
 #------------------------------------------------------------------------------
 # Check latest release with GitHub API
 
-get_latest_release(){ 
-    # Curl timeout options:
-    # https://unix.stackexchange.com/questions/94604/does-curl-have-a-timeout
-    curl --silent -m 10 --connect-timeout 5 \
-        "https://api.github.com/repos/$1/releases/latest" |
-    grep '"tag_name":' |          # Get tag line
-    sed -E 's/.*"([^"]+)".*/\1/'  # Pluck JSON value
-}
+# Get latest release info
+# Curl timeout options:
+# https://unix.stackexchange.com/questions/94604/does-curl-have-a-timeout
+release=$(curl --silent -m 10 --connect-timeout 5 \
+    "https://api.github.com/repos/$repo/releases/latest")
 
-tag=$(get_latest_release "$repo")
+# Release version
+tag=$(echo "$release" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 shorttag="${tag:1}"
-#scriptpath=$(dirname -- "$0")
 
 # Get script location
 # https://stackoverflow.com/questions/59895/
@@ -152,93 +154,113 @@ source=${BASH_SOURCE[0]}
 while [ -L "$source" ]; do # Resolve $source until the file is no longer a symlink
     scriptpath=$( cd -P "$( dirname "$source" )" >/dev/null 2>&1 && pwd )
     source=$(readlink "$source")
-    # If $source was a relative symlink, we need to resolve it 
+    # If $source was a relative symlink, we need to resolve it
     # relative to the path where the symlink file was located
     [[ $source != /* ]] && source=$scriptpath/$source
 done
 scriptpath=$( cd -P "$( dirname "$source" )" >/dev/null 2>&1 && pwd )
+scriptfile=$( basename -- "$source" )
+echo "Running from: ${scriptpath}/$scriptfile"
+
 #echo "Script location: $scriptpath"  # debug
+#echo "Source: $source"               # debug
+#echo "Script filename: $scriptfile"  # debug
+
+#echo "tag: $tag"              # debug
+#echo "scriptver: $scriptver"  # debug
+
+
+cleanup_tmp(){ 
+    # Delete downloaded .tar.gz file
+    if [[ -f "/tmp/$script-$shorttag.tar.gz" ]]; then
+        if ! rm "/tmp/$script-$shorttag.tar.gz"; then
+            echo -e "${Error}ERROR${Off} Failed to delete"\
+                "downloaded /tmp/$script-$shorttag.tar.gz!" >&2
+        fi
+    fi
+
+    # Delete extracted tmp files
+    if [[ -d "/tmp/$script-$shorttag" ]]; then
+        if ! rm -r "/tmp/$script-$shorttag"; then
+            echo -e "${Error}ERROR${Off} Failed to delete"\
+                "downloaded /tmp/$script-$shorttag!" >&2
+        fi
+    fi
+}
 
 
 if ! printf "%s\n%s\n" "$tag" "$scriptver" |
-        sort --check=quiet --version-sort &> /dev/null ; then
-    echo -e "${Cyan}There is a newer version of this script available.${Off}"
+        sort --check=quiet --version-sort >/dev/null ; then
+    echo -e "\n${Cyan}There is a newer version of this script available.${Off}"
     echo -e "Current version: ${scriptver}\nLatest version:  $tag"
-    if [[ -f $scriptpath/$script-$shorttag.tar.gz ]]; then
+    scriptdl="$scriptpath/$script-$shorttag"
+    if [[ -f ${scriptdl}.tar.gz ]] || [[ -f ${scriptdl}.zip ]]; then
         # They have the latest version tar.gz downloaded but are using older version
-        echo "https://github.com/$repo/releases/latest"
+        echo "You have the latest version downloaded but are using an older version"
         sleep 10
-    elif [[ -d $scriptpath/$script-$shorttag ]]; then
+    elif [[ -d $scriptdl ]]; then
         # They have the latest version extracted but are using older version
-        echo "https://github.com/$repo/releases/latest"
+        echo "You have the latest version extracted but are using an older version"
         sleep 10
     else
         echo -e "${Cyan}Do you want to download $tag now?${Off} [y/n]"
         read -r -t 30 reply
         if [[ ${reply,,} == "y" ]]; then
+            # Delete previously downloaded .tar.gz file and extracted tmp files
+            cleanup_tmp
+
             if cd /tmp; then
                 url="https://github.com/$repo/archive/refs/tags/$tag.tar.gz"
-                if ! curl -LJO -m 30 --connect-timeout 5 "$url";
-                then
-                    echo -e "${Error}ERROR ${Off} Failed to download"\
+                if ! curl -JLO -m 30 --connect-timeout 5 "$url"; then
+                    echo -e "${Error}ERROR${Off} Failed to download"\
                         "$script-$shorttag.tar.gz!"
                 else
                     if [[ -f /tmp/$script-$shorttag.tar.gz ]]; then
                         # Extract tar file to /tmp/<script-name>
                         if ! tar -xf "/tmp/$script-$shorttag.tar.gz" -C "/tmp"; then
-                            echo -e "${Error}ERROR ${Off} Failed to"\
+                            echo -e "${Error}ERROR${Off} Failed to"\
                                 "extract $script-$shorttag.tar.gz!"
                         else
-                            # Copy new script sh files to script location
-                            if ! cp -p "/tmp/$script-$shorttag/"*.sh "$scriptpath"; then
-                                copyerr=1
-                                echo -e "${Error}ERROR ${Off} Failed to copy"\
-                                    "$script-$shorttag .sh file(s) to:\n $scriptpath"
-                            else                   
-                                # Set permsissions on CHANGES.txt
-                                if ! chmod 744 "$scriptpath/"*.sh ; then
-                                    permerr=1
-                                    echo -e "${Error}ERROR ${Off} Failed to set permissions on:"
-                                    echo "$scriptpath *.sh file(s)"
-                                fi
+                            # Set script sh files as executable
+                            if ! chmod a+x "/tmp/$script-$shorttag/"*.sh ; then
+                                permerr=1
+                                echo -e "${Error}ERROR${Off} Failed to set executable permissions"
                             fi
 
-                            # Copy new CHANGES.txt file to script location
-                            if ! cp -p "/tmp/$script-$shorttag/CHANGES.txt" "$scriptpath"; then
+                            # Copy new script sh file to script location
+                            if ! cp -p "/tmp/$script-$shorttag/${scriptname}.sh" "${scriptpath}/${scriptfile}";
+                            then
                                 copyerr=1
-                                echo -e "${Error}ERROR ${Off} Failed to copy"\
-                                    "$script-$shorttag/CHANGES.txt to:\n $scriptpath"
-                            else                   
+                                echo -e "${Error}ERROR${Off} Failed to copy"\
+                                    "$script-$shorttag sh file(s) to:\n $scriptpath/${scriptfile}"
+                            fi
+
+                            # Copy new CHANGES.txt file to script location (if script on a volume)
+                            if [[ $scriptpath =~ /volume* ]]; then
                                 # Set permsissions on CHANGES.txt
-                                if ! chmod 744 "$scriptpath/CHANGES.txt"; then
+                                if ! chmod 664 "/tmp/$script-$shorttag/CHANGES.txt"; then
                                     permerr=1
-                                    echo -e "${Error}ERROR ${Off} Failed to set permissions on:"
+                                    echo -e "${Error}ERROR${Off} Failed to set permissions on:"
                                     echo "$scriptpath/CHANGES.txt"
                                 fi
+
+                                # Copy new CHANGES.txt file to script location
+                                if ! cp -p "/tmp/$script-$shorttag/CHANGES.txt"\
+                                    "${scriptpath}/${scriptname}_CHANGES.txt";
+                                then
+                                    echo -e "${Error}ERROR${Off} Failed to copy"\
+                                        "$script-$shorttag/CHANGES.txt to:\n $scriptpath"
+                                else
+                                    changestxt=" and changes.txt"
+                                fi
                             fi
 
-                            # Delete downloaded .tar.gz file
-                            if ! rm "/tmp/$script-$shorttag.tar.gz"; then
-                                #delerr=1
-                                echo -e "${Error}ERROR ${Off} Failed to delete"\
-                                    "downloaded /tmp/$script-$shorttag.tar.gz!"
-                            fi
-
-                            # Delete extracted tmp files
-                            if ! rm -r "/tmp/$script-$shorttag"; then
-                                #delerr=1
-                                echo -e "${Error}ERROR ${Off} Failed to delete"\
-                                    "downloaded /tmp/$script-$shorttag!"
-                            fi
+                            # Delete downloaded tmp files
+                            cleanup_tmp
 
                             # Notify of success (if there were no errors)
                             if [[ $copyerr != 1 ]] && [[ $permerr != 1 ]]; then
-                                echo -e "\n$tag and changes.txt downloaded to:"\
-                                    "$scriptpath"
-                                #echo -e "${Cyan}Do you want to stop this script"\
-                                #    "so you can run the new one?${Off} [y/n]"
-                                #read -r reply
-                                #if [[ ${reply,,} == "y" ]]; then exit; fi
+                                echo -e "\n$tag ${scriptfile}$changestxt downloaded to: ${scriptpath}\n"
 
                                 # Reload script
                                 printf -- '-%.0s' {1..79}; echo  # print 79 -
@@ -246,13 +268,14 @@ if ! printf "%s\n%s\n" "$tag" "$scriptver" |
                             fi
                         fi
                     else
-                        echo -e "${Error}ERROR ${Off}"\
+                        echo -e "${Error}ERROR${Off}"\
                             "/tmp/$script-$shorttag.tar.gz not found!"
                         #ls /tmp | grep "$script"  # debug
                     fi
                 fi
+                cd "$scriptpath" || echo -e "${Error}ERROR${Off} Failed to cd to script location!"
             else
-                echo -e "${Error}ERROR ${Off} Failed to cd to /tmp!"
+                echo -e "${Error}ERROR${Off} Failed to cd to /tmp!"
             fi
         fi
     fi
@@ -359,7 +382,7 @@ if [[ $restore == "yes" ]]; then
         #    checkcurrent "is now "
         #    exit
         #else
-        #    echo -e "\n${Error}ERROR ${Off} Restore from backup failed!"
+        #    echo -e "\n${Error}ERROR${Off} Restore from backup failed!"
         #    exit 1
         #fi
 
@@ -390,7 +413,7 @@ if [[ $restore == "yes" ]]; then
         echo
         checkcurrent "is "
     else
-        echo -e "\n${Error}ERROR ${Off} Backup synoinfo.conf not found!"
+        echo -e "\n${Error}ERROR${Off} Backup synoinfo.conf not found!"
         exit 1
     fi
     exit
@@ -404,7 +427,7 @@ if [[ ! -f ${synoinfo}.bak ]]; then
     if cp -p "$synoinfo" "$synoinfo".bak ; then
         echo -e "\nsynoinfo.conf backed up."
     else
-        echo -e "\n${Error}ERROR ${Off} synoinfo.conf backup failed!"
+        echo -e "\n${Error}ERROR${Off} synoinfo.conf backup failed!"
         exit 1
     fi
 else

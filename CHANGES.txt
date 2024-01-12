@@ -1,3 +1,6 @@
+v1.0.10
+- Improved script updating itself
+
 v1.0.8
 - Minor bug fix
 
