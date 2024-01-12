@@ -1,11 +1,14 @@
 v1.0.10
-- Improved script updating itself
+- Improved script updating itself.
+
+v1.0.9
+Removed all references to RAID F1 in script and images.
 
 v1.0.8
-- Minor bug fix
+- Minor bug fix.
 
 v1.0.6
-- Renamed to Synology_SHR_switch
+- Renamed to Synology_SHR_switch.
 
 v1.0.5
 - Changed RAID-F1 references to RAID-Group.
