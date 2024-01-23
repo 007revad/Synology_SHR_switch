@@ -24,7 +24,7 @@ High-end Synology NAS models have RAID Groups enabled and SHR disabled. This scr
 [How to enable SSH and login to DSM via SSH](https://kb.synology.com/en-global/DSM/tutorial/How_to_login_to_DSM_with_root_permission_via_SSH_Telnet)
 
 ```YAML
-sudo -i /volume1/scripts/syno_shr_switch.sh
+sudo -s /volume1/scripts/syno_shr_switch.sh
 ```
 **Note:** Replace /volume1/scripts/ with the path to where the script is located.
 
