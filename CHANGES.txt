@@ -1,3 +1,6 @@
+v1.0.11
+- Bug fix when script updates itself and user ran the script from ./scriptname.sh
+
 v1.0.10
 - Improved script updating itself.
 
