@@ -9,7 +9,7 @@
 # sudo /volume1/scripts/syno_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.10"
+scriptver="v1.0.11"
 script=Synology_SHR_switch
 repo="007revad/Synology_SHR_switch"
 scriptname=syno_shr_switch
@@ -264,7 +264,7 @@ if ! printf "%s\n%s\n" "$tag" "$scriptver" |
 
                                 # Reload script
                                 printf -- '-%.0s' {1..79}; echo  # print 79 -
-                                exec "$0" "${args[@]}"
+                                exec "${scriptpath}/$scriptfile" "${args[@]}"
                             fi
                         fi
                     else
