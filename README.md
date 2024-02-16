@@ -7,9 +7,11 @@
 
 ### Description
 
-Easily switch between SHR and RAID Groups
+Easily switch between SHR and RAID Groups, or enable RAID-F1
 
-High-end Synology NAS models have RAID Groups enabled and SHR disabled. This script allows you to switch from SHR to RAID Groups, or from RAID Groups to SHR. It backs up the synoinfo.conf first, so you can restore it later if needed.
+- Allows you to enable RAID-F1 on Synology consumer NAS models that don't have RAID-F1 as an option.
+- Allows you to switch between SHR and RAID Groups.
+- The script backs up the original settings so it can restore them later if needed.
 
 ## Download the script
 
@@ -38,7 +40,10 @@ sudo -s /volume1/scripts/syno_shr_switch.sh
 ## Screenshots
 
 <p align="center">Check currently set RAID type</p>
-<p align="center"><img src="/images/raidgroup_shr-switch_check3.png"></p>
+<p align="center"><img src="/images/check_raidf1.png"></p>
+
+<p align="center">Enable RAID-F1</p>
+<p align="center"><img src="/images/enable_raidf1.png"></p>
 
 <p align="center">Switch to SHR</p>
 <p align="center"><img src="/images/raidgroup_shr-switch_shr3.png"></p>
