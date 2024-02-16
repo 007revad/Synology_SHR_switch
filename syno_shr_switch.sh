@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #------------------------------------------------------------------------------
 # Switch between SHR and RAID Group for models that have SHR & SHR-2 disabled
+# Enable RAID-F1 on non-business models that don't have RAID-F1 enabled
 #
 # Github: https://github.com/007revad/Synology_SHR_switch
 # Script verified at https://www.shellcheck.net/
@@ -9,7 +10,7 @@
 # sudo /volume1/scripts/syno_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v1.0.11"
+scriptver="v2.0.12"
 script=Synology_SHR_switch
 repo="007revad/Synology_SHR_switch"
 scriptname=syno_shr_switch
@@ -299,8 +300,10 @@ synoinfo="/etc.defaults/synoinfo.conf"
 # Set short variables
 sshr=support_syno_hybrid_raid
 srg=supportraidgroup
+srf1=support_diffraid
 
 # Check current setting
+echo ""
 checkcurrent(){ 
     settingshr="$(get_key_value $synoinfo ${sshr})"
     settingraidgrp="$(get_key_value $synoinfo ${srg})"
@@ -308,8 +311,16 @@ checkcurrent(){
         echo -e "${Cyan}SHR${Off} ${1}enabled.\n" >&2
         enabled="shr"
     elif [[ $settingshr != "yes" ]] && [[ $settingraidgrp == "yes" ]]; then
-        echo -e "${Cyan}RAID Group${Off} ${1}enabled.\n" >&2
+        echo -e "${Cyan}RAID Groups${Off} ${1}enabled.\n" >&2
         enabled="raidgrp"
+    fi
+
+    settingraidf1="$(get_key_value $synoinfo ${srf1})"
+    if [[ $settingraidf1 == "yes" ]]; then
+        echo -e "${Cyan}RAID-F1${Off} ${1}enabled.\n" >&2
+        enabledf1="raidf1"
+    else
+        echo -e "${Cyan}RAID-F1${Off} ${1}disabled.\n" >&2
     fi
 }
 
@@ -323,16 +334,28 @@ fi
 #--------------------------------------------------------------------
 # Select RAID type
 
-PS3="Select the RAID type: "
+PS3="Select the RAID type to enable: "
 if [[ $enabled == "shr" ]]; then
-    options=("RAID Group" "Restore" "Quit")
-    #options=("RAID Group" "Quit")
+    #options=("RAID Groups" "Quit")
+    if [[ $enabledf1 == "raidf1" ]]; then
+        options=("RAID Groups" "Restore" "Quit")
+    else
+        options=("RAID Groups" "RAID-F1" "Restore" "Quit")
+    fi
 elif [[ $enabled == "raidgrp" ]]; then
-    options=("SHR" "Restore" "Quit")
     #options=("SHR" "Quit")
+    if [[ $enabledf1 == "raidf1" ]]; then
+        options=("SHR" "Restore" "Quit")
+    else
+        options=("SHR" "RAID-F1" "Restore" "Quit")
+    fi
 else
-    #options=("SHR" "RAID Group" "Restore" "Quit")
-    options=("SHR" "RAID Group" "Quit")
+    #options=("SHR" "RAID Groups" "Restore" "Quit")
+    if [[ $enabledf1 == "raidf1" ]]; then
+        options=("SHR" "RAID Groups" "Quit")    
+    else
+        options=("SHR" "RAID Groups" "RAID-F1" "Quit")
+    fi
 fi
 select raid in "${options[@]}"; do
     case "$raid" in
@@ -349,7 +372,17 @@ select raid in "${options[@]}"; do
             raidgrp="yes"
             echo -e "You selected ${Cyan}RAID Group${Off}"
             if [[ $enabled == "raidgrp" ]]; then
-                echo -e "${Cyan}RAID Group${Off} is already enabled."
+                echo -e "${Cyan}RAID Groups${Off} is already enabled."
+            else
+                break
+            fi
+            break
+            ;;
+        "RAID-F1")
+            raidf1="yes"
+            echo -e "You selected ${Cyan}RAID-F1${Off}"
+            if [[ $enabledf1 == "raidf1" ]]; then
+                echo -e "${Cyan}RAID-F1${Off} is already enabled."
             else
                 break
             fi
@@ -389,6 +422,7 @@ if [[ $restore == "yes" ]]; then
         # Get default key values from backup
         defaultsrg=$(synogetkeyvalue "$synoinfo".bak "$srg")
         defaultsshr=$(synogetkeyvalue "$synoinfo".bak "$sshr")
+        defaultsrf1=$(synogetkeyvalue "$synoinfo".bak "$srf1")
 
         # Set key values to defaults
         if [[ $defaultsrg ]]; then
@@ -411,6 +445,15 @@ if [[ $restore == "yes" ]]; then
         fi
 
         echo
+        if [[ $defaultsrf1 ]]; then
+            #echo -e "\nset support_raid_group $defaultsrf1"    # debug
+
+            synosetkeyvalue "$synoinfo" "$srf1" "$defaultsrf1"
+        else
+            #echo -e "\nset support_diffraid no"                # debug
+
+            synosetkeyvalue "$synoinfo" "$srf1" "no"
+        fi
         checkcurrent "is "
     else
         echo -e "\n${Error}ERROR${Off} Backup synoinfo.conf not found!"
@@ -453,7 +496,6 @@ if [[ $raidgrp == "yes" ]]; then
     fi
 fi
 
-
 # Enable SHR
 if [[ $shr == "yes" ]]; then
     synosetkeyvalue "$synoinfo" "$srg" no
@@ -466,6 +508,19 @@ if [[ $shr == "yes" ]]; then
         echo -e "\n${Cyan}SHR${Off} has been enabled.\n"
     else
         echo -e "\n${Error}ERROR${Off} Failed to enable SHR!"
+    fi
+fi
+
+# Enable RAID-F1
+if [[ $raidf1 == "yes" ]]; then
+    synosetkeyvalue "$synoinfo" "$srf1" yes
+
+    # Check if we enabled RAID-F1
+    settingraidf1="$(get_key_value $synoinfo ${srf1})"
+    if [[ $settingraidf1 == "yes" ]]; then
+        echo -e "\n${Cyan}RAID-F1${Off} has been enabled.\n"
+    else
+        echo -e "\n${Error}ERROR${Off} Failed to enable RAID-F1!"
     fi
 fi
 

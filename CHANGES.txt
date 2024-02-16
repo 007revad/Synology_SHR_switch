@@ -1,3 +1,6 @@
+v2.0.12
+- Added RAID-F1 option.
+
 v1.0.11
 - Bug fix when script updates itself and user ran the script from ./scriptname.sh
 
