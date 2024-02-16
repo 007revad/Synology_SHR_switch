@@ -10,7 +10,8 @@
 Easily switch between SHR and RAID Groups, or enable RAID-F1
 
 - Allows you to enable RAID-F1 on Synology consumer NAS models that don't have RAID-F1 as an option.
-- Allows you to switch between SHR and RAID Groups.
+  - Like a [DS1821+ with 3 NVMe drives in RAID-F1](/images/ds1821_3nvme_raidf1.png).
+- Allows you to switch between SHR and RAID Groups.  
 - The script backs up the original settings so it can restore them later if needed.
 
 ## Download the script
