@@ -10,7 +10,7 @@
 # sudo /volume1/scripts/syno_shr_switch.sh
 #------------------------------------------------------------------------------
 
-scriptver="v2.0.12"
+scriptver="v2.0.13"
 script=Synology_SHR_switch
 repo="007revad/Synology_SHR_switch"
 scriptname=syno_shr_switch
@@ -125,10 +125,10 @@ echo "$script $scriptver"
 model=$(cat /proc/sys/kernel/syno_hw_version)
 
 # Get DSM full version
-productversion=$(get_key_value /etc.defaults/VERSION productversion)
-buildphase=$(get_key_value /etc.defaults/VERSION buildphase)
-buildnumber=$(get_key_value /etc.defaults/VERSION buildnumber)
-smallfixnumber=$(get_key_value /etc.defaults/VERSION smallfixnumber)
+productversion=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION productversion)
+buildphase=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION buildphase)
+buildnumber=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION buildnumber)
+smallfixnumber=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION smallfixnumber)
 
 # Show DSM full version and model
 if [[ $buildphase == GM ]]; then buildphase=""; fi
@@ -305,8 +305,8 @@ srf1=support_diffraid
 # Check current setting
 echo ""
 checkcurrent(){ 
-    settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    settingshr="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${sshr})"
+    settingraidgrp="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${srg})"
     if [[ $settingshr == "yes" ]] && [[ $settingraidgrp != "yes" ]]; then
         echo -e "${Cyan}SHR${Off} ${1}enabled.\n" >&2
         enabled="shr"
@@ -315,7 +315,7 @@ checkcurrent(){
         enabled="raidgrp"
     fi
 
-    settingraidf1="$(get_key_value $synoinfo ${srf1})"
+    settingraidf1="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${srf1})"
     if [[ $settingraidf1 == "yes" ]]; then
         echo -e "${Cyan}RAID-F1${Off} ${1}enabled.\n" >&2
         enabledf1="raidf1"
@@ -420,39 +420,39 @@ if [[ $restore == "yes" ]]; then
         #fi
 
         # Get default key values from backup
-        defaultsrg=$(synogetkeyvalue "$synoinfo".bak "$srg")
-        defaultsshr=$(synogetkeyvalue "$synoinfo".bak "$sshr")
-        defaultsrf1=$(synogetkeyvalue "$synoinfo".bak "$srf1")
+        defaultsrg=$(/usr/syno/bin/synogetkeyvalue "$synoinfo".bak "$srg")
+        defaultsshr=$(/usr/syno/bin/synogetkeyvalue "$synoinfo".bak "$sshr")
+        defaultsrf1=$(/usr/syno/bin/synogetkeyvalue "$synoinfo".bak "$srf1")
 
         # Set key values to defaults
         if [[ $defaultsrg ]]; then
             #echo -e "\nset support_raid_group $defaultsrg"    # debug
 
-            synosetkeyvalue "$synoinfo" "$srg" "$defaultsrg"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srg" "$defaultsrg"
         else
             #echo -e "\nset support_raid_group no"             # debug
 
-            synosetkeyvalue "$synoinfo" "$srg" "no"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srg" "no"
         fi
         if [[ $defaultsshr ]]; then
             #echo "set support_syno_hybrid_raid $defaultsshr"  # debug
 
-            synosetkeyvalue "$synoinfo" "$sshr" "$defaultsshr"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$sshr" "$defaultsshr"
         else
             #echo "set support_syno_hybrid_raid no"            # debug
 
-            synosetkeyvalue "$synoinfo" "$sshr" "no"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$sshr" "no"
         fi
 
         echo
         if [[ $defaultsrf1 ]]; then
             #echo -e "\nset support_raid_group $defaultsrf1"    # debug
 
-            synosetkeyvalue "$synoinfo" "$srf1" "$defaultsrf1"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srf1" "$defaultsrf1"
         else
             #echo -e "\nset support_diffraid no"                # debug
 
-            synosetkeyvalue "$synoinfo" "$srf1" "no"
+            /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srf1" "no"
         fi
         checkcurrent "is "
     else
@@ -483,12 +483,12 @@ fi
 
 # Enable RAID Group
 if [[ $raidgrp == "yes" ]]; then
-    synosetkeyvalue "$synoinfo" "$srg" yes
-    synosetkeyvalue "$synoinfo" "$sshr" no
+    /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srg" yes
+    /usr/syno/bin/synosetkeyvalue "$synoinfo" "$sshr" no
 
     # Check if we enabled RAID Group
-    settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    settingshr="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${sshr})"
+    settingraidgrp="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${srg})"
     if [[ $settingshr != "yes" ]] && [[ $settingraidgrp == "yes" ]]; then
         echo -e "\n${Cyan}RAID Group${Off} has been enabled.\n"
     else
@@ -498,12 +498,12 @@ fi
 
 # Enable SHR
 if [[ $shr == "yes" ]]; then
-    synosetkeyvalue "$synoinfo" "$srg" no
-    synosetkeyvalue "$synoinfo" "$sshr" yes
+    /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srg" no
+    /usr/syno/bin/synosetkeyvalue "$synoinfo" "$sshr" yes
 
     # Check if we enabled SHR
-    settingshr="$(get_key_value $synoinfo ${sshr})"
-    settingraidgrp="$(get_key_value $synoinfo ${srg})"
+    settingshr="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${sshr})"
+    settingraidgrp="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${srg})"
     if [[ $settingshr == "yes" ]] && [[ $settingraidgrp != "yes" ]]; then
         echo -e "\n${Cyan}SHR${Off} has been enabled.\n"
     else
@@ -513,10 +513,10 @@ fi
 
 # Enable RAID-F1
 if [[ $raidf1 == "yes" ]]; then
-    synosetkeyvalue "$synoinfo" "$srf1" yes
+    /usr/syno/bin/synosetkeyvalue "$synoinfo" "$srf1" yes
 
     # Check if we enabled RAID-F1
-    settingraidf1="$(get_key_value $synoinfo ${srf1})"
+    settingraidf1="$(/usr/syno/bin/synogetkeyvalue $synoinfo ${srf1})"
     if [[ $settingraidf1 == "yes" ]]; then
         echo -e "\n${Cyan}RAID-F1${Off} has been enabled.\n"
     else
