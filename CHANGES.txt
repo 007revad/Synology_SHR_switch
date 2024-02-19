@@ -1,3 +1,6 @@
+v2.0.13
+- Hard coded /usr/syno/bin/ for Synology commands (to prevent $PATH issues).
+
 v2.0.12
 - Added RAID-F1 option.
 
