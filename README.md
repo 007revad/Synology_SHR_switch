@@ -42,7 +42,7 @@ sudo -s /volume1/scripts/syno_shr_switch.sh
 ## Screenshots
 
 <p align="center">DS1821+ with RAID-F1</p>
-<p align="center"><img src="/images/raidf1.png"></p>
+<p align="center"><img src="/images/raidf1-2.png"></p>
 
 <p align="center">Check currently set RAID type</p>
 <p align="center"><img src="/images/check_raidf1.png"></p>
