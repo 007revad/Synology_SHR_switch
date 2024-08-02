@@ -15,6 +15,8 @@ Easily switch between SHR and RAID Groups, or enable RAID-F1
 - Allows you to switch between SHR and RAID Groups.  
 - The script backs up the original settings so it can restore them later if needed.
 
+Note: RAID Groups only support RAID 5, RAID 6 and RAID F1
+
 ## Download the script
 
 1. Download the latest version _Source code (zip)_ from https://github.com/007revad/Synology_SHR_Switch/releases
